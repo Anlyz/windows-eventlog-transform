@@ -2,8 +2,8 @@ use serde_json::to_string_pretty;
 use winevents_xml_transform::{from_file, ToCEF};
 
 fn main() {
-    let eg5 = from_file("data/winevt5.xml");
-    let out = eg5.unwrap();
+    let eg7 = from_file("data/winevt7.xml");
+    let out = eg7.unwrap();
     println!("Event Json String");
     println!("{}", to_string_pretty(&out).unwrap());
     println!("---------------");

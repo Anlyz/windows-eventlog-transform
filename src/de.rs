@@ -1,18 +1,19 @@
 #![allow(non_snake_case)]
-use serde::{Deserialize, Deserializer, Serialize};
-use serde_with::skip_serializing_none;
-use serde_json::{json, Value};
 
 use std::collections::HashMap;
 
+use serde::{Deserialize, Deserializer, Serialize};
+use serde_json::{json, Value};
+use serde_with::skip_serializing_none;
+
 use crate::{
-    mappings::{
-        levels::level_map,
+    mappers::{
+        event_name::eventid_map,
         keywords::keywords_map,
-        events::eventid_map,
+        levels::level_map,
         opcode::opcode_map,
         tasks::tasks_map,
-    },
+    }
 };
 
 #[skip_serializing_none]
@@ -27,6 +28,8 @@ pub struct Event {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct System {
     pub Provider: Option<Provider>,
+    #[serde(default = "default_device_vendor")]
+    pub DeviceVendor: String,
     pub EventRecordID: usize,
     #[serde(alias = "EventID", deserialize_with = "eventid_map")]
     pub Event: EventInfo,
@@ -52,6 +55,7 @@ pub struct System {
 pub struct Provider {
     pub Name: Option<String>,
     pub Guid: Option<String>,
+    pub EventSourceName: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -123,6 +127,12 @@ fn eventdata_map<'de, D>(deserializer: D) -> Result<Value, D::Error>
                     }
                 }
             }
+            // remove null from vec
+            let v = v
+                .iter()
+                .filter(|a|!a.as_ref().is_none())
+                .map(|a|a.as_ref().unwrap().to_string())
+                .collect::<Vec<String>>();
 
             match (m.is_empty(), v.is_empty()) {
                 (true, true) => Default::default(),
@@ -141,4 +151,8 @@ fn flatten_time_created<'de, D>(deserializer: D) -> Result<String, D::Error>
         D: Deserializer<'de>,
 {
     TimeCreated::deserialize(deserializer).map(|x| x.SystemTime)
+}
+
+fn default_device_vendor() -> String {
+    "Microsoft".to_string()
 }

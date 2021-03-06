@@ -1,7 +1,10 @@
 mod de;
 use de::Event;
 
-mod mappings;
+mod cef;
+pub use cef::ToCEF;
+
+mod mappers;
 
 use quick_xml::de::from_str;
 
@@ -15,7 +18,6 @@ use std::{
 ///
 /// ## Example usage
 /// ```rust
-/// let xml_string = r#""#;
 /// let e = winevents_xml_transform::from_file("data/winevt1.xml").unwrap();
 /// println!("{:#?}", e);
 /// ```
